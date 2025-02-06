@@ -45,7 +45,7 @@ namespace ClassWork5_3
                 }
             }
             //print the count 
-            Console.Write("\nThe number 11 is repeated " + count + " times.");
+            Console.Write($"\nThe number 11 is repeated {count} times.");
         }
     }
 }

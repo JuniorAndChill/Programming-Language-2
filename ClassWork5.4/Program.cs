@@ -31,7 +31,7 @@ namespace ClassWork5_4
             //for loop to access array and store the inputs
             for(int i = 0; i < n; i++)
             {
-                Console.Write("\nGive me value #" + (i+1) + " : ");
+                Console.Write($"\nGive me value #{i+1} : ");
                 int reps= Convert.ToInt32(Console.ReadLine());
                 num [i] = reps;
             }
@@ -62,7 +62,7 @@ namespace ClassWork5_4
                 }
             }
             //placement is important. If in loop it'll print on every check. It's weird like that
-            Console.Write("\nThe values consecutive?: " + consecutive);
+            Console.Write($"\nThe values consecutive?: {consecutive}");
         }
     }
 }
