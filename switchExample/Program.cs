@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*Daniel Critchlow Jr*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,12 +13,16 @@ namespace switchExample
         {
             /* Read a number and indicate what month it is using a switch*/
             
-
-            Console.Write("Input a number between 1 - 12: ");
+            //take and convert input to integer 
+            Console.Write("Input a number between 1 - 12 to find month: ");
             int month = int.Parse(Console.ReadLine());
 
+            //declare swith and check against "month" value
             switch(month)
             {
+                //case checks for matching value "month == 1" for example
+                //when match is found it displays message only after the process
+                //gets kicked out from "break;" statement. Exits current loop
                 case 1:
                 Console.WriteLine("January");
                 break;
@@ -54,6 +59,7 @@ namespace switchExample
                 case 12:
                 Console.WriteLine("December");
                 break;
+                //default adds a form of error handeling
                 default:
                 Console.WriteLine("Wrong Number");
                 break;
