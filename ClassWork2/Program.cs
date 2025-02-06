@@ -91,6 +91,7 @@ namespace ClassWork2
             int charValue = letter - 'a';
             int shiftedValue = (charValue + shift) % 26;
 
+            //"(char)(shiftedValue + 'a')" displays result as a letter. Otherwise it would be Unicode result
             Console.WriteLine("Shifted letter: "+ (char)(shiftedValue + 'a'));
             
             Console.ReadLine();
