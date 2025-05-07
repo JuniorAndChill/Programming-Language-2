@@ -20,14 +20,20 @@ namespace PopSongs
 
         private void btn_AddSong_Click(object sender, EventArgs e)
         {
+            string songPath = (Application.StartupPath + "\\Song" + "_" + txb_SongName.Text + ".txt");
+            string songTitle = lbl_Title.Text + ": " + txb_SongName.Text;
+            string songArtist = lbl_Artist.Text + ": " + txb_Artist.Text;
+            string songLabel = lbl_Label.Text + ": " + txb_Label.Text;
+            string songYear = lbl_Year.Text + ": " + txb_Year.Text;
+            string songDuration = lbl_Duration.Text + ": " + txb_Duration.Text;
             try
             {
-                StreamWriter sw = new StreamWriter(Application.StartupPath + "\\Song" + "_" + txb_SongName.Text + ".txt");
-                sw.WriteLine(lbl_Title.Text + ": " + txb_SongName.Text);
-                sw.WriteLine(lbl_Artist.Text + ": " + txb_Artist.Text);
-                sw.WriteLine(lbl_Label.Text + ": " + txb_Label.Text);
-                sw.WriteLine(lbl_Year.Text + ": " + txb_Year.Text);
-                sw.WriteLine(lbl_Duration.Text + ": " + txb_Duration.Text);
+                StreamWriter sw = new StreamWriter(songPath);
+                sw.WriteLine(songTitle);
+                sw.WriteLine(songArtist);
+                sw.WriteLine(songLabel);
+                sw.WriteLine(songYear);
+                sw.WriteLine(songDuration);
                 sw.Close();
             }
             catch (System.IO.FileNotFoundException)
@@ -35,7 +41,7 @@ namespace PopSongs
                 // Error message for error
                 MessageBox.Show("Nope!");
             }
-            StreamReader sr = new StreamReader(Application.StartupPath + "\\Song" + "_" + txb_SongName.Text + ".txt");
+            StreamReader sr = new StreamReader(songPath);
             txb_Result.Text = sr.ReadToEnd();
             sr.Close();
       }

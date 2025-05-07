@@ -70,9 +70,6 @@ namespace uno_ColorAdd
             playerHandPanels.Add(new FlowLayoutPanel() { Location = new Point(10, 10), Size = new Size(panelWidth, panelHeight), AutoScroll = true });
             playerHandPanels.Add(new FlowLayoutPanel() { Location = new Point(this.ClientSize.Width / 2 + 10, 10), Size = new Size(panelWidth, panelHeight), AutoScroll = true });
 
-            // Creates player indicators
-            //arrowUp.Add(new PictureBox() { Location = new Point(20, this.ClientSize.Height - panelHeight - 10), Size = new Size(panelWidth, panelHeight)})
-
             // Evaluates player hands and deals cards from deck list
             foreach (var panel in playerHandPanels)
             {
@@ -92,10 +89,10 @@ namespace uno_ColorAdd
         }
         private void InitializeTurnArrows()
         {
-            // Define image paths (Consider using relative paths or resources for distribution)
-            string basePath = "C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd"; // Make sure this is correct
-            string arrowUpPath = Path.Combine(basePath, "arrowUp.png");
-            string arrowDownPath = Path.Combine(basePath, "arrowDown.png");
+            // Define image paths
+            string filePath1 = Path.Combine(Application.StartupPath);
+            string arrowUpPath = Path.Combine(filePath1, "arrowUp.png");
+            string arrowDownPath = Path.Combine(filePath1, "arrowDown.png");
 
             // Pre-load images
             try
@@ -116,7 +113,7 @@ namespace uno_ColorAdd
 
             playerArrowIndicators = new List<PictureBox>();
 
-            // --- Define Arrow Positions (relative to player areas if possible) ---
+            // Define Arrow Positions (relative to player areas)
             // Arrow for Player 0 (Bottom-Left Panel Area)
             Point arrow0Pos = new Point(playerHandPanels[0].Left + playerHandPanels[0].Width / 2 - 25, playerHandPanels[0].Top - 100); // Above center of panel 0
             PictureBox arrow0 = CreateArrowPictureBox(arrow0Pos);
@@ -125,19 +122,16 @@ namespace uno_ColorAdd
             // Arrow for Player 1 (Bottom-Right Panel Area)
             Point arrow1Pos = new Point(playerHandPanels[1].Left + playerHandPanels[1].Width / 2 - 25, playerHandPanels[1].Top - 100); // Above center of panel 1
             PictureBox arrow1 = CreateArrowPictureBox(arrow1Pos);
-            // Consider rotating this image 90 degrees clockwise if using Up/Down arrows, or use specific Left/Right arrow images.
             playerArrowIndicators.Add(arrow1);
 
-            // Arrow for Player 2 (Top-Right Panel Area)
+            // Arrow for Player 2 (Top-Left Panel Area)
             Point arrow2Pos = new Point(playerHandPanels[2].Left + playerHandPanels[2].Width / 2 - 25, playerHandPanels[2].Bottom + 10); // Below center of panel 2
             PictureBox arrow2 = CreateArrowPictureBox(arrow2Pos);
-            // Consider rotating this image 180 degrees if using Up/Down arrows.
             playerArrowIndicators.Add(arrow2);
 
-            // Arrow for Player 3 (Top-Left Panel Area)
+            // Arrow for Player 3 (Top-Right Panel Area)
             Point arrow3Pos = new Point(playerHandPanels[3].Left + playerHandPanels[3].Width / 2 - 25, playerHandPanels[3].Bottom + 10); // Below center of panel 3
             PictureBox arrow3 = CreateArrowPictureBox(arrow3Pos);
-            // Consider rotating this image 90 degrees counter-clockwise if using Up/Down arrows.
             playerArrowIndicators.Add(arrow3);
 
 
@@ -149,7 +143,6 @@ namespace uno_ColorAdd
             }
 
             // Initial turn indicator is set after StartGame() calls NextPlayer indirectly or directly.
-            // We'll call it explicitly in StartGame to be sure.
         }
         private PictureBox CreateArrowPictureBox(Point location)
         {
@@ -157,7 +150,7 @@ namespace uno_ColorAdd
             pb.Size = new Size(50, 50); // Standard size
             pb.Location = location;     // Set position
             pb.SizeMode = PictureBoxSizeMode.StretchImage; // Scale image to fit
-            pb.BackColor = Color.Transparent; // Optional: make background see-through
+            pb.BackColor = Color.Transparent; // Makes background see-through
             pb.Visible = false;         // Start hidden
             return pb;
         }
@@ -204,7 +197,7 @@ namespace uno_ColorAdd
             if (playerHands[currentPlayerIndex].Count == 1) // Only valid if player HAS one card
             {
                 unoCalled = true;
-                // Simple confirmation for now
+                // Simple confirmation message
                 MessageBox.Show($"Player {currentPlayerIndex + 1} declared UNO!", "UNO!", MessageBoxButtons.OK);
             }
             else
@@ -215,6 +208,7 @@ namespace uno_ColorAdd
         // Deck creation and concatnation
         private void InitializeUnoDeck()
         {
+            string filePath1 = Path.Combine(Application.StartupPath);
             string[] colors = { "red", "yellow", "green", "blue", "wild" };
             string[] values = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "skip", "reverse", "draw2", "wild", "wilddraw4" };
 
@@ -225,7 +219,7 @@ namespace uno_ColorAdd
                 {
                     foreach (string value in new[] { "wild", "wilddraw4" })
                     {
-                        string imageName = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", $"{color}_{value}.png");
+                        string imageName = Path.Combine(filePath1, $"{color}_{value}.png");
                         for (int i = 0; i < 4; i++)
                         {
                             deck.Add(new UnoCard(color, value, imageName, true));
@@ -236,7 +230,7 @@ namespace uno_ColorAdd
                 {
                     foreach (string value in new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "skip", "reverse", "draw2" })
                     {
-                        string imageName = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", $"{color}_{value}.png");
+                        string imageName = Path.Combine(filePath1, $"{color}_{value}.png");
                         deck.Add(new UnoCard(color, value, imageName, false));
                         if (value != "0")
                         {
@@ -356,7 +350,7 @@ namespace uno_ColorAdd
             }
             if (IsLegalMove(card, hand))
             {
-                string chosenColorForWild = card.Color; // Store original color in case it's wild
+                string chosenColorForWild = card.Color; // Store original color in case it's wild (was a longtime issue)
                 // Handle wild cards needing color choice *before* moving to discard
                 if (card.IsWild)
                 {
@@ -382,7 +376,7 @@ namespace uno_ColorAdd
                 }
                 UpdateDiscardPileDisplay();
                 UpdatePlayerHandDisplay(hand); // Update the hand *after* removing card
-                UpdateDeckPileDisplay(); // Update deck count visual (optional)
+                UpdateDeckPileDisplay(); // Update deck count visual (optional, sometimes too many updates causes lagged gameplay)
                 // Apply effects *after* card is successfully played and displays updated
                 ApplyCardEffects(card);
                 // Check win condition *after* applying effects
@@ -390,9 +384,10 @@ namespace uno_ColorAdd
                 {
                     CheckWinCondition(hand);
                     // If game ended/reset by CheckWinCondition, stop further processing in this turn
-                    if (hand.Count == 0 && discardPile.Count == 0) return; // A bit crude check for reset might be needed
+                    if (hand.Count == 0 && discardPile.Count == 0) 
+                        return; // A bit crude check for reset might be needed
                 }
-                // Move to the next player only if it was a NUMBER card.
+                // Move to the next player only if it was a NUMBER card (another issues spot)
                 // ApplyCardEffects handles turn progression for ALL action cards (Skip, Rev, D2, Wild, WD4).
                 bool isActionCard = card.Value == "skip" || card.Value == "reverse" || card.Value == "draw2" || card.IsWild; // IsWild covers wild and wilddraw4
                 if (!isActionCard)
@@ -420,6 +415,7 @@ namespace uno_ColorAdd
         // Shows card backs for the deck pile from path
         private void UpdateDeckPileDisplay()
         {
+            string filePath1 = Path.Combine(Application.StartupPath);
             deckPilePanel.Controls.Clear();
             if (deck.Count >= 0)
             {
@@ -427,7 +423,7 @@ namespace uno_ColorAdd
                 deckImage.Size = new Size(100, 150);
                 try
                 {
-                    string imagePath = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", "card_back.png");
+                    string imagePath = Path.Combine(filePath1, "card_back.png");
                     deckImage.Image = Image.FromFile(imagePath);
                 }
                 catch (System.IO.FileNotFoundException)
@@ -445,7 +441,7 @@ namespace uno_ColorAdd
             panel.Controls.Clear();
             for (int i = 0; i < hand.Count; i++)
             {
-                // Can modify here to display the backs of cards instead for an AI game
+                // Can modify here to display the backs of cards instead for an AI game (maybe for another time)
                 CreateCardPictureBox(hand[i], i, panel, true);
             }
         }
@@ -463,17 +459,17 @@ namespace uno_ColorAdd
                 return;
             }
 
-            // 1. Hide all player arrow indicators
+            // Hide all player arrow indicators
             foreach (var arrow in playerArrowIndicators)
             {
                 arrow.Visible = false;
             }
 
-            // 2. Check if the current player index is valid
+            // Check if the current player index is valid
             bool indexValid = currentPlayerIndex >= 0 && currentPlayerIndex < numberOfPlayers;
             if (indexValid)
             {
-                // 3. Select the correct arrow PictureBox for the current player
+                // Select the correct arrow PictureBox for the current player
                 PictureBox currentArrow = playerArrowIndicators[currentPlayerIndex];
 
                 if (currentPlayerIndex == 0 || currentPlayerIndex == 1) // Set image if it's missing
@@ -484,7 +480,7 @@ namespace uno_ColorAdd
                 {
                     currentArrow.Image = arrowUpImage;
                 }
-                // 5. Make ONLY the current player's arrow visible
+                // Make ONLY the current player's arrow visible
                 currentArrow.Visible = true;
                 currentArrow.BringToFront(); // Ensure it's not hidden behind other controls
             }            
@@ -492,6 +488,7 @@ namespace uno_ColorAdd
         // Uses list of deck to generate cards as needed
         private void CreateCardPictureBox(UnoCard card, int index, Panel panel, bool showFront)
         {
+            string filePath1 = Path.Combine(Application.StartupPath);
             PictureBox cardPictureBox = new PictureBox();
             cardPictureBox.Location = new Point(index * 110, 0);
             cardPictureBox.Size = new Size(100, 150);
@@ -501,11 +498,11 @@ namespace uno_ColorAdd
                 string imagePath;
                 if (showFront)
                 {
-                    imagePath = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", card.ImageName);
+                    imagePath = Path.Combine(filePath1, card.ImageName);
                 }
                 else
                 {
-                    imagePath = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", "card_back.png");
+                    imagePath = Path.Combine(filePath1, "card_back.png");
                 }
                 cardPictureBox.Image = Image.FromFile(imagePath);
             }
@@ -573,13 +570,16 @@ namespace uno_ColorAdd
                 DealStartingHand(playerHands[i], 7);
             }
             DrawCard(discardPile); // Draw the first discard card
-            UpdateDiscardPileDisplay(); // Update the display *after* drawing the card
+
+            UpdateDeckPileDisplay();
+            UpdateDiscardPileDisplay();
             UpdateCurrentPlayerLabel();
+            UpdateTurnIndicator();
         }
         // Player turn direction logic
         private void NextPlayer()
         {
-            // Use the unified direction variable
+            // Use the unified direction variable (another long troublshooting spot)
             if (isPlayDirectionClockwise) // Should be true initially
             {
                 // Original order: 0 -> 1 -> 2 -> 3 -> 0
@@ -632,9 +632,9 @@ namespace uno_ColorAdd
             return card.Color == activeColor || card.Value == topDiscard.Value;
         }
         // Color choice ComboBox with legal color options based on colors in hand
-        private string ChooseWildColor(List<UnoCard> hand) // Keep 'hand' parameter if needed for logic, else remove
+        private string ChooseWildColor(List<UnoCard> hand) // 'hand' parameter needed for logic
         {
-            // Simplified: always allow choosing any color
+            // Always allow choosing any color
             List<string> availableColors = new List<string> { "Red", "Blue", "Green", "Yellow" };
 
             string chosenColor = "";
@@ -656,7 +656,7 @@ namespace uno_ColorAdd
                 Button okButton = new Button();
                 okButton.Text = "OK";
                 okButton.Location = new Point(colorSelectionForm.ClientSize.Width / 2 - okButton.Width / 2, 50);
-                okButton.DialogResult = DialogResult.OK; // Set DialogResult
+                okButton.DialogResult = DialogResult.OK; // Set DialogResult (troubleshoot tool)
                 colorSelectionForm.AcceptButton = okButton; // Allow Enter key
                 colorSelectionForm.Controls.Add(okButton);
 
@@ -692,12 +692,12 @@ namespace uno_ColorAdd
             Color displayBackColor = Color.DarkGray; // Default background color
 
             // Determine the active color:
-            // 1. Check if a wild color was chosen (`currentColor` variable)
+            // Check if a wild color was chosen (`currentColor` variable)
             if (!string.IsNullOrEmpty(currentColor))
             {
                 displayColorText = currentColor;
             }
-            // 2. If no wild color is active, check the top card of the discard pile
+            // If no wild color is active, check the top card of the discard pile
             else if (discardPile.Count > 0)
             {
                 UnoCard topCard = discardPile.Last();
@@ -723,7 +723,7 @@ namespace uno_ColorAdd
             }
             activeColorLabel.BackColor = displayBackColor;
 
-            // Optional: Adjust text color for better contrast on certain backgrounds
+            // Adjust text color for better contrast on certain backgrounds
             if (displayBackColor == Color.Yellow || displayBackColor == Color.LightGray)
             {
                 activeColorLabel.ForeColor = Color.Black;
@@ -920,7 +920,7 @@ namespace uno_ColorAdd
         // Save scores method
         private void RecordScores(int actualWinnerIndex)
         {
-            // --- Simple Score Calculation & Output ---
+            // Simple Score Calculation & Output
             try
             {
                 int winnerIndex = actualWinnerIndex; // Use the passed-in index
@@ -983,46 +983,67 @@ namespace uno_ColorAdd
             {
                 foreach (var arrow in playerArrowIndicators)
                 {
-                    if (arrow != null) // Check if arrow itself is null
+                    if (arrow != null)
                     {
-                        this.Controls.Remove(arrow); // Remove from form's controls
-                        arrow.Dispose(); // Release resources associated with the control
+                        this.Controls.Remove(arrow);
+                        arrow.Dispose();
                     }
                 }
-                playerArrowIndicators.Clear(); // Clear the list
-                playerArrowIndicators = null; // Optional: Set list to null
+                playerArrowIndicators.Clear();
+                playerArrowIndicators = null;
             }
-            // Clear game state lists
             deck.Clear();
             discardPile.Clear();
             foreach (var hand in playerHands)
             {
                 hand.Clear();
             }
-            // Clear display panels associated with hands
             foreach (var panel in playerHandPanels)
             {
                 panel.Controls.Clear();
             }
-            // Clear discard and deck panels visually
             discardPilePanel.Controls.Clear();
             discardPilePanel.BackColor = Color.LightGray;
             deckPilePanel.Controls.Clear();
             deckPilePanel.BackColor = Color.Gray;
+
             // Reset state variables
             currentPlayerIndex = 0;
             isPlayDirectionClockwise = true;
             unoCalled = false;
             currentColor = "";
             draggedCard = null;
-            // Re-initialize and start
+
             InitializeUnoDeck(); // Recreate the deck list
-            // Re-initialize Arrows
             InitializeTurnArrows(); // Create new PictureBoxes, add to new list, add to Controls
 
-            // Start the new game (deals cards, sets up discard, updates UI including arrows)
-            StartGame();
+            // Temporarily disable the draw button to prevent accidental click
+            bool drawButtonOriginalState = false;
+            if (drawButton != null) // Check if drawButton has been initialized
+            {
+                drawButtonOriginalState = drawButton.Enabled;
+                drawButton.Enabled = false;
+            }
+
+            StartGame(); // This now correctly calls UpdateTurnIndicator, UpdateDeckPileDisplay, etc.
+                         // Game is set for Player 1 (index 0) to start.
+
+            // Show the modal MessageBox
             MessageBox.Show("Game Reset.", "New Game", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // Re-enable the draw button
+            if (drawButton != null)
+            {
+                drawButton.Enabled = drawButtonOriginalState;
+            }
+
+            // Explicitly set focus to the form or a non-interactive panel.
+            // This helps prevent an "Enter" key press for the MessageBox
+            // from also triggering a focused button on the form.
+            if (this.CanFocus)
+            {
+                this.Focus();
+            }
         }
         // Run game
         public class UnoCard
