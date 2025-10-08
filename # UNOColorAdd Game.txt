@@ -1,0 +1,324 @@
+# UNOColorAdd Game
+
+### Constructor
+
+this.ClientSize = new Size(1200, 800);
+
+### 
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+namespace uno_ColorAdd
+{
+    public partial class Form1 : Form
+    {
+        private List<PictureBox> cardPictureBoxes = new List<PictureBox>();
+        private List<UnoCard> deck = new List<UnoCard>();
+        private List<UnoCard> discardPile = new List<UnoCard>();
+        private List<List<UnoCard>> playerHands = new List<List<UnoCard>>();
+        private List<Panel> playerHandPanels = new List<Panel>();
+        private int currentPlayerIndex = 0;
+        private int numberOfPlayers = 4;
+
+        public Form1()
+        {
+            InitializeComponent();
+            InitializePanels();
+            InitializeButtons();
+            InitializeLabels();
+            InitializeUnoDeck();
+            InitializeZoomedCardPictureBox();
+            InitializeCardControls();
+            StartGame();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void InitializePanels()
+        {
+            discardPilePanel = new Panel();
+            discardPilePanel.Location = new Point(this.ClientSize.Width / 2 - 50, this.ClientSize.Height / 2 - 75);
+            discardPilePanel.Size = new Size(100, 150);
+            this.Controls.Add(discardPilePanel);
+
+            int panelWidth = this.ClientSize.Width / 2 - 20;
+            int panelHeight = 160;
+
+            playerHandPanels.Add(new FlowLayoutPanel() { Location = new Point(10, this.ClientSize.Height - panelHeight - 10), Size = new Size(panelWidth, panelHeight), AutoScroll = true }); // FlowLayoutPanel
+            playerHandPanels.Add(new FlowLayoutPanel() { Location = new Point(this.ClientSize.Width / 2 + 10, this.ClientSize.Height - panelHeight - 10), Size = new Size(panelWidth, panelHeight), AutoScroll = true }); // FlowLayoutPanel
+            playerHandPanels.Add(new FlowLayoutPanel() { Location = new Point(10, 10), Size = new Size(panelWidth, panelHeight), AutoScroll = true }); // FlowLayoutPanel
+            playerHandPanels.Add(new FlowLayoutPanel() { Location = new Point(this.ClientSize.Width / 2 + 10, 10), Size = new Size(panelWidth, panelHeight), AutoScroll = true }); // FlowLayoutPanel
+
+            foreach (var panel in playerHandPanels)
+            {
+                this.Controls.Add(panel);
+                playerHands.Add(new List<UnoCard>());
+            }
+        }
+
+        private void InitializeButtons()
+        {
+            drawButton = new Button() { Location = new Point(10, this.ClientSize.Height - 200), Text = "Draw Card" };
+            playButton = new Button() { Location = new Point(120, this.ClientSize.Height - 200), Text = "Play Card" };
+            unoButton = new Button() { Location = new Point(230, this.ClientSize.Height - 200), Text = "UNO!" };
+
+            drawButton.Click += DrawButton_Click;
+            playButton.Click += PlayButton_Click;
+            unoButton.Click += UnoButton_Click;
+
+            this.Controls.Add(drawButton);
+            this.Controls.Add(playButton);
+            this.Controls.Add(unoButton);
+        }
+
+        private void InitializeLabels()
+        {
+            currentPlayerLabel = new Label() { Location = new Point(this.ClientSize.Width / 2 - 100, this.ClientSize.Height - 200), Text = $"Player {currentPlayerIndex + 1}'s Turn" };
+            this.Controls.Add(currentPlayerLabel);
+        }
+
+        private void DrawButton_Click(object sender, EventArgs e)
+        {
+            DrawCard(playerHands[currentPlayerIndex]);
+        }
+
+        private void PlayButton_Click(object sender, EventArgs e)
+        {
+            NextPlayer();
+        }
+
+        private void UnoButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show($"Player {currentPlayerIndex + 1} declared UNO!");
+        }
+
+        private void InitializeUnoDeck()
+        {
+            string[] colors = { "red", "yellow", "green", "blue", "wild" };
+            string[] values = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "skip", "reverse", "draw2", "wild", "wilddraw4" };
+
+            foreach (string color in colors)
+            {
+                // Only process wild cards for "wild" color.
+                if (color == "wild")
+                {
+                    foreach (string value in new[] { "wild", "wilddraw4" })
+                    {
+                        string imageName = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", $"{color}_{value}.png");
+                        for (int i = 0; i < 4; i++)
+                        {
+                            deck.Add(new UnoCard(color, value, imageName, true));
+                        }
+                    }
+                }
+                else // Process colored cards.
+                {
+                    foreach (string value in new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "skip", "reverse", "draw2" })
+                    {
+                        string imageName = Path.Combine("C:\\Users\\dj_dc\\OneDrive\\Desktop\\Programming Language 2\\uno_ColorAdd\\img", $"{color}_{value}.png");
+                        deck.Add(new UnoCard(color, value, imageName, false));
+                        if (value != "0")
+                        {
+                            deck.Add(new UnoCard(color, value, imageName, false));
+                        }
+                    }
+                }
+            }
+        }
+
+        private void InitializeCardControls()
+        {
+            // Cards are dynamically generated when they are in a hand or discard pile.
+        }
+
+        private void InitializeZoomedCardPictureBox()
+        {
+            zoomedCardPictureBox = new PictureBox();
+            zoomedCardPictureBox.Size = new Size(200, 300);
+            zoomedCardPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+            zoomedCardPictureBox.Visible = false;
+            this.Controls.Add(zoomedCardPictureBox);
+        }
+
+        private void CardPictureBox_MouseEnter(object sender, EventArgs e)
+        {
+            PictureBox cardPictureBox = (PictureBox)sender;
+            zoomedCardPictureBox.Image = cardPictureBox.Image;
+            zoomedCardPictureBox.Location = new Point(this.ClientSize.Width - zoomedCardPictureBox.Width - 10, this.ClientSize.Height / 2 - zoomedCardPictureBox.Height / 2);
+            zoomedCardPictureBox.Visible = true;
+        }
+
+        private void CardPictureBox_MouseLeave(object sender, EventArgs e)
+        {
+            zoomedCardPictureBox.Visible = false;
+        }
+
+        private void DrawCard(List<UnoCard> hand)
+        {
+            if (deck.Count == 0)
+            {
+                ReshuffleDiscardPile();
+            }
+
+            if (deck.Count > 0)
+            {
+                UnoCard drawnCard = deck[0];
+                deck.RemoveAt(0);
+                hand.Add(drawnCard);
+
+                int handIndex = playerHands.IndexOf(hand);
+                if (handIndex >= 0 && handIndex < playerHandPanels.Count)
+                {
+                    CreateCardPictureBox(drawnCard, hand.Count - 1, playerHandPanels[handIndex], true);
+                }
+                else
+                {
+                    Console.WriteLine("Error: Invalid hand index.");
+                }
+            }
+        }
+
+        private void ReshuffleDiscardPile()
+        {
+            if (discardPile.Count > 1)
+            {
+                UnoCard topCard = discardPile[discardPile.Count - 1];
+                discardPile.RemoveAt(discardPile.Count - 1);
+                deck.AddRange(discardPile);
+                discardPile.Clear();
+                discardPile.Add(topCard);
+                ShuffleDeck();
+            }
+        }
+
+        private void ShuffleDeck()
+        {
+            Random rng = new Random();
+            int n = deck.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                UnoCard value = deck[k];
+                deck[k] = deck[n];
+                deck[n] = value;
+            }
+        }
+
+        private void DealStartingHand(List<UnoCard> hand, int numberOfCards)
+        {
+            for (int i = 0; i < numberOfCards; i++)
+            {
+                DrawCard(hand);
+            }
+        }
+
+        private void PlayCard(UnoCard card, List<UnoCard> hand)
+        {
+            discardPile.Add(card);
+            hand.Remove(card);
+            UpdateDiscardPileDisplay();
+            UpdatePlayerHandDisplay(hand);
+            NextPlayer();
+        }
+
+        private void UpdateDiscardPileDisplay()
+        {
+            discardPilePanel.Controls.Clear();
+            if (discardPile.Count > 0)
+            {
+                UnoCard topCard = discardPile[discardPile.Count - 1];
+                CreateCardPictureBox(topCard, 0, discardPilePanel, false);
+            }
+        }
+
+        private void UpdatePlayerHandDisplay(List<UnoCard> hand)
+        {
+            Panel panel = playerHandPanels[playerHands.IndexOf(hand)];
+            panel.Controls.Clear();
+            for (int i = 0; i < hand.Count; i++)
+            {
+                CreateCardPictureBox(hand[i], i, panel, true);
+            }
+        }
+
+        private void CreateCardPictureBox(UnoCard card, int index, Panel panel, bool showFront)
+        {
+            PictureBox cardPictureBox = new PictureBox();
+            cardPictureBox.Location = new Point(index * 110, 0);
+            cardPictureBox.Size = new Size(100, 150);
+            try
+            {
+                string imagePath;
+                if (showFront)
+                {
+                    imagePath = Path.Combine(Application.StartupPath, "img", card.ImageName);
+                }
+                else
+                {
+                    imagePath = Path.Combine(Application.StartupPath, "img", "card_back.png");
+                }
+                cardPictureBox.Image = Image.FromFile(imagePath);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show($"Image file not found: {(showFront ? card.ImageName : "card_back.png")}");
+            }
+            cardPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            cardPictureBox.MouseEnter += CardPictureBox_MouseEnter;
+            cardPictureBox.MouseLeave += CardPictureBox_MouseLeave;
+            cardPictureBox.Tag = card;
+            panel.Controls.Add(cardPictureBox);
+        }
+
+        private void StartGame()
+        {
+            ShuffleDeck();
+            for (int i = 0; i < numberOfPlayers; i++)
+            {
+                DealStartingHand(playerHands[i], 7);
+            }
+            DrawCard(discardPile);
+            UpdateCurrentPlayerLabel();
+        }
+
+        private void NextPlayer()
+        {
+            currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+            UpdateCurrentPlayerLabel();
+        }
+
+        private void UpdateCurrentPlayerLabel()
+        {
+            currentPlayerLabel.Text = $"Player {currentPlayerIndex + 1}'s Turn";
+        }
+
+        public class UnoCard
+        {
+            public string Color { get; set; }
+            public string Value { get; set; }
+            public string ImageName { get; set; }
+            public bool IsWild { get; set; }
+
+            public UnoCard(string color, string value, string imageName, bool isWild)
+            {
+                Color = color;
+                Value = value;
+                ImageName = imageName;
+                IsWild = isWild;
+            }
+        }
+    }
+}
